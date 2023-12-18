@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gartic Salas VET</title>
+    <link rel="icon" href="https://gartic.com.br/imgs/mural/ii/iikyuung/estranho-mundo-de-jack.png" type="image/png">
+
+    <!-- Importar a fonte do Google Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans&display=swap" rel="stylesheet">
+
+    <style>
+        /* Estilos CSS */
+        body {
+            font-family: 'Google Sans', sans-serif !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-size: calc(12px + 2vmin);
+            padding: 1em;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: purple;
+        }
+
+        #jogadoresOnline {
+            color: black; /* Alterando a cor do número de jogadores online para preto */
+        }
+
+        footer {
+            text-align: center;
+            font-size: 12px;
+            margin-top: auto;
+        }
+
+        table {
+            width: 100%;
+            max-width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+            border: 3px solid #6A0DAD;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+            background-color: #FFF;
+        }
+
+        th {
+            background-color: #4B0082;
+            color: #FFF;
+        }
+
+        .avatar {
+            margin-right: 0.5em;
+            border-radius: 50%;
+            width: 30px; /* Tamanho fixo do avatar */
+            height: 30px; /* Tamanho fixo do avatar */
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .player-info {
+            display: inline-block;
+            vertical-align: middle;
+            width: calc(100% - 40px); /* Ajusta o tamanho do nome do jogador */
+            white-space: nowrap; /* Evita que o texto quebre */
+            overflow: hidden; /* Oculta o texto que excede a largura da célula */
+            text-overflow: ellipsis; /* Mostra "..." se o texto estiver cortado */
+        }
+
+        select {
+            font-size: 1em; /* Tamanho do texto do seletor */
+            margin-bottom: 1em;
+            padding: 6px; /* Espaçamento interno do seletor */
+            border: 2px solid purple; /* Alterando a cor da borda do seletor para marrom */
+        }
+
+        #closeBtn {
+            padding: 10px; /* Tamanho do botão de fechar sala */
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body>
+<h1>Gartic Salas VET</h1>
+    <!-- Adicionando a parte de jogadores online -->
+    <h1>Jogadores Online: <span id="jogadoresOnline">Carregando...</span></h1>
+    <a href="https://gtcmod.github.io/garticbusc/" style="color: purple; text-decoration: underline;">Clique aqui: Buscador de Jogadores Jogando</a>
+    <p style="color: purple;">Escolha uma sala:</p>
+    <select id="garticCode" onchange="handleSelectChange()">
+        <option value="">Selecione uma Sala</option>
+
+<!-- ANIMAIS -->
+<option value="033">ANIMAIS 1</option>
+<option value="061314">ANIMAIS 6</option>
+<option value="015352954">ANIMAIS 49</option>
+<option value="015352967">ANIMAIS 50</option>
+
+<!-- OBJ -->
+<option value="023">OBJETOS 1</option>
+<option value="018828880">OBJETOS 70</option>
+
+<!-- ALIMENTOS -->
+<option value="032">ALIMENTOS 1</option>
+<option value="019474604">ALIMENTOS 101</option>
+<option value="019474640">ALIMENTOS 104</option>
+
+<!-- VERBOS -->
+<option value="011436709">VERBOS 5</option>
+<option value="01442892">VERBOS 16</option>
+
+<!-- GERAL -->
+<option value="03">GERAL 3</option>
+<option value="05">GERAL 5</option>
+<option value="019472087">GERAL 150</option>
+<option value="019472095">GERAL 151</option>
+<option value="019472132">GERAL 154</option>
+
+<!-- PROFISSÔES -->
+<option value="0180144">PROFISSÔES 1</option>
+<option value="010583436">PROFISSÔES 10</option>
+
+<!-- D.A (Desenhos Animados) -->
+<option value="015352887">D.A 16</option>
+
+<!-- MINECRAFT -->
+<option value="05312998">MINECRAFT 1</option>
+
+
+    </select>
+    <button id="closeBtn" onclick="closeRoom()">Fechar Sala</button>
+    <table id="garticTable">
+        <tr>
+            <th></th>
+            <th>Posição</th>
+            <th>Jogadores</th>
+            <th>Pontos</th>
+        </tr>
+    </table>
+    <div id="status"></div>
+<div id="garticLink">Link de Sala: <a id="linkText" href="#" target="_blank">Link de Sala</a></div>
+
+    <script>
+    function atualizarJogadoresOnline() {
+            fetch('https://gartic.com.br/request/mobile/ping.php')
+                .then(response => response.json())
+                .then(data => {
+                    var jogadoresOnline = data.jogando;
+                    var jogadoresOnlineElement = document.getElementById("jogadoresOnline");
+
+                    if (jogadoresOnline <= 2400) {
+                        jogadoresOnlineElement.style.color = 'black';
+                    } else if (jogadoresOnline <= 3500) {
+                        jogadoresOnlineElement.style.color = 'red';
+                    } else {
+                        jogadoresOnlineElement.style.color = 'purple';
+                    }
+
+                    jogadoresOnlineElement.textContent = jogadoresOnline;
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados:', error);
+                });
+        }
+        
+        function handleSelectChange() {
+            fetchGarticInfo();
+        }
+
+        function closeRoom() {
+            // Lógica para fechar a sala selecionada
+        }
+
+       function fetchGarticInfo() {
+    var select = document.getElementById('garticCode');
+    var garticCode = select.value;
+
+    var playersToAddSymbols = {
+        'keltek': '👑 🏠',
+        'quely': '👑 ⚾️',
+        'rayruim': '👑',
+        'unsenses': '👑🏠',
+        'RayPG': '👑 ❤️',
+        'Mirella_': '👑',
+        'Hlozek': '🏠',
+        'imaturidade_': '🐼 ⚾️ 🍓🎈 🐭 🏠',
+        'Menina16': '👑',
+        'decenty': '👑 🐼',
+        // Adicione outros jogadores e símbolos conforme necessário
+    };
+
+    if (garticCode) {
+        var url = 'https://gartic.com.br/info_sala.php?x=&id_sala=' + garticCode;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                var table = document.getElementById('garticTable');
+                var status = document.getElementById('status');
+                var link = document.getElementById('linkText');
+
+                table.innerHTML = '<tr><th>Posição</th><th>Jogadores</th><th>Pontos</th></tr>';
+
+                data.jogadores.forEach((jogador, index) => {
+                    var row = table.insertRow(-1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+
+                    cell1.innerHTML = index + 1;
+
+                    // Verifica se o jogador está na lista de símbolos e adiciona os símbolos correspondentes
+                    var playerName = jogador.toLowerCase(); // Converter para letras minúsculas
+                    var symbolToAdd = playersToAddSymbols[playerName];
+                    var playerNameWithSymbol = jogador;
+
+                    if (symbolToAdd) {
+                        playerNameWithSymbol += ' ' + symbolToAdd;
+                    }
+
+                    cell2.innerHTML = '<div class="player"><img src="https://gartic.com.br/avatar.php?nick=' + jogador + '" class="avatar">' +
+                        '<a href="https://gartic.com.br/' + jogador + '" class="player" target="_blank">' + playerNameWithSymbol + '</a></div>';
+                    cell3.innerHTML = data.pontos[index] + ' pontos';
+                });
+
+                        var vacancies = 10 - data.jogadores.length;
+                        if (vacancies > 0) {
+                            status.innerHTML = 'Há ' + vacancies + ' vagas disponíveis.';
+                            status.style.color = 'green';
+                        } else if (data.jogadores.length === 10) {
+                            status.innerHTML = 'A sala está cheia.';
+                            status.style.color = 'red';
+                        } else {
+                            status.innerHTML = 'A sala está muito cheia.';
+                            status.style.color = 'purple';
+                        }
+
+                        link.innerHTML = 'https://gartic.com.br/' + garticCode;
+                        link.href = 'https://gartic.com.br/' + garticCode;
+
+                        // Atualiza o texto das opções no select com o número de jogadores
+                        updateSelectOptions(data.salas);
+                    })
+                    .catch((error) => {
+                        console.error('Erro:', error);
+                    });
+            }
+        }
+
+        function openRoomLink() {
+            var garticCode = document.getElementById('garticCode').value;
+            window.open('https://gartic.com.br/' + garticCode, '_blank');
+        }
+
+        function updateSelectOptions(salas) {
+            var select = document.getElementById('garticCode');
+
+            // Ordena as salas ativas no começo e com base na quantidade de jogadores
+            salas.sort((a, b) => {
+                var playersA = a.jogadores.length;
+                var playersB = b.jogadores.length;
+
+                return playersB - playersA;
+            });
+
+            // Remove todas as opções atuais do select
+            while (select.firstChild) {
+                select.removeChild(select.firstChild);
+            }
+
+            // Adiciona as opções atualizadas no select
+            salas.forEach(sala => {
+                var option = document.createElement('option');
+                option.value = sala.id;
+                option.innerHTML = sala.nome + ' (' + sala.total_jogadores + ')';
+
+                // Adiciona classe de estilo com base na quantidade de jogadores
+                if (sala.jogadores.length >= 10) {
+                    option.classList.add('ten-or-more-players');
+                } else {
+                    option.classList.add('less-than-ten-players');
+                }
+
+                select.appendChild(option);
+            });
+        }
+
+        // Lógica para preenchimento inicial do select com as salas disponíveis
+        var salas = [
+            // Estrutura de salas: { id: 'id_da_sala', nome: 'Nome da Sala', jogadores: [], total_jogadores: numero_total_de_jogadores }
+            // Adicione aqui as salas disponíveis com seus respectivos detalhes
+        ];
+
+        salas.forEach(sala => {
+            var option = document.createElement('option');
+            option.value = sala.id;
+            option.innerHTML = sala.nome + ' (' + sala.total_jogadores + ')';
+
+            document.getElementById('garticCode').appendChild(option);
+        });
+
+        // Inicializa a função fetchGarticInfo para a sala selecionada
+        fetchGarticInfo();
+        // Lógica para atualização automática das informações da sala a cada segundo
+        setInterval(fetchGarticInfo, 600); // Mude o intervalo conforme necessário
+            setInterval(atualizarJogadoresOnline, 600); // Atualizar a cada 1 segundo (1000ms)
+    atualizarJogadoresOnline(); // Atualizar imediatamente ao carregar a página
+    </script>
+</body>
+
+</html>
